@@ -1,46 +1,33 @@
 import threading
 import time
-
-# Задана спільна змінна
+# Спільна змінна
 shared_var = 0
 
-# Кількість змінних, на які буде розбита спільна змінна
-num_sub_vars = 10
-
-# Список менших змінних
-a = int(shared_var/num_sub_vars)
-sub_vars = [a] * num_sub_vars
 
 # Створюємо м'ютекс
 mutex = threading.Lock()
-IinRange = 10000
-amount = int (IinRange/num_sub_vars*2)
-
 
 # Функція, яку буде виконувати кожен потік
-def increment_sub_var(sub_var_index):
+def increment_shared_var():
     global shared_var
-    for i in range(amount):
+    for i in range(100000):
         # Захоплюємо м'ютекс
         mutex.acquire()
-        sub_vars[sub_var_index] += 1
-        shared_var = sum(sub_vars)
+        shared_var += 1
         # Звільняємо м'ютекс
         mutex.release()
 
-# Створюємо потоки для кожної меншої змінної
-threads = []
-for i in range(num_sub_vars):
-    thread = threading.Thread(target=increment_sub_var, args=(i,))
-    threads.append(thread)
+# Створюємо два потоки
+thread1 = threading.Thread(target=increment_shared_var)
+thread2 = threading.Thread(target=increment_shared_var)
 
 # Запускаємо потоки
-for thread in threads:
-    thread.start()
+thread1.start()
+thread2.start()
 
 # Очікуємо завершення потоків
-for thread in threads:
-    thread.join()
+thread1.join()
+thread2.join()
 
 # Виводимо значення спільної змінної
 print(shared_var)
@@ -48,4 +35,4 @@ print(shared_var)
 # Виводимо час роботи
 start_time = time.time()
 end_time = time.time()
-print(f"Час виконання : {(end_time - start_time)*100000:.4f} секунд")
+print(f"Час виконання : {(end_time - start_time)*100000000:.4f} секунд")
